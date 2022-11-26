@@ -25,7 +25,7 @@ for graphno in range(graphs):
 	start = time.time()
 	for runno in range(runs):
 		startlocal = time.time()
-		print 'Running for graph no', graphno+1, 'run no', runno+1
+		print('Running for graph no', graphno+1, 'run no', runno+1)
 		if runno==0:
 			#create graph and store it
 			SN = Social_Net(complete_net=False)
@@ -45,16 +45,16 @@ for graphno in range(graphs):
 		spreading = Spread_Net(G=G, setval=True)
 		datadict = spreading.many_dayrun(num_days=ndays, curve=False)
 		#repdict = spreading.reproduction_number(givedata=False)
-		#print 'datadict', datadict
+		#print('datadict', datadict)
 		for k in datadict.keys():
 			for ind in range(ndays):
 				cumdict[k][ind].append(datadict[k][ind])
 		#for ind in range(ndays):
 		#	cumrep[ind].append(repdict[ind])
-		print 'Run completed in', time.time()-startlocal, 'seconds'
-	print 'Run for one graph completed in', time.time()-start, 'seconds'
+		print('Run completed in', time.time()-startlocal, 'seconds')
+	print('Run for one graph completed in', time.time()-start, 'seconds')
 
-#print 'cumdict is', cumdict
+#print('cumdict is', cumdict)
 #cumdict['repno'] = cumrep
 cumdict = spreading.filter_data(cumdict)
 
@@ -66,7 +66,7 @@ for k in cumdict.keys():
 		stdevdict[k][ind] = statistics.stdev(cumdict[k][ind])
 
 spreading.draw_curve(datadict=avgdict, N=N, num_days=ndays, confidence=True, stdevdict=stdevdict, img_file='avg_temp.png')
-#print cumdict['repno']
+#print(cumdict['repno'])
 
 with open('avg_temp.json', 'w+') as fp:
 	json.dump(cumdict, fp)

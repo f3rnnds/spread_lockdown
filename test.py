@@ -6,7 +6,7 @@ import time
 
 
 #Create the social network and save it in graphml for representation and in gml for reading later
-print 'Starting graph creation'
+print('Starting graph creation')
 start = time.time()
 SN = Social_Net(complete_net=False)
 SN.set_parameters(ba_degree=2, social_prob=0.00025, rand_degree=25)
@@ -16,22 +16,22 @@ G = SN.return_graph()
 #gmlfile = 'results/structure_10k_1.gml'
 #nx.write_graphml(G, networkfile)
 #nx.write_gml(G, gmlfile)
-print 'Graph creation completed in', time.time()-start, 'seconds'
+print('Graph creation completed in', time.time()-start, 'seconds')
 SN.degree_histogram()
-print 'Degree distribution plotted'
+print('Degree distribution plotted')
 
 
 #read from file if the file is already saved
-#print 'Starting the reading'
+#print('Starting the reading')
 #gmlreadfile = 'results/structure_1k_1.gml'
 #G = nx.read_gml(gmlreadfile)
-#print 'Network read'
+#print('Network read')
 
 spreading = Spread_Net(G=G, infected_init=5, setval=True)
 #spreading.set_parameters(trans_asymp=0.03)
 spreading.many_dayrun(num_days=240, lockstart=5, lockend=65, postlock=True, complete_norm=70, curve=True)
 #d = spreading.reproduction_number(draw=True)
-#print d
+#print(d)
 #spreading.many_dayrun(num_days=120, curve=True, img_file = 'results/time_10k_2.png', datafile='results/data_10k_2.json')
 #spreading.many_dayrun(num_days=240, lockstart=25, lockend=85, curve=True)
 #spreading.many_dayrun(num_days=180, lockstart=5, lockend=45, postlock=True, complete_norm=75, curve=True)

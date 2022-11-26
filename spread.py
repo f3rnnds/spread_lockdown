@@ -16,22 +16,22 @@ class Spread_Net():
 		self.infect_dict = {0:infected}
 		for n in self.G.nodes():
 			if n in infected:
-				self.G.node[n]['status'] = 'infected'
-				self.G.node[n]['day'] = 0
-				self.G.node[n]['future'] = 'immunity'
-				self.G.node[n]['symptoms'] = False
-				self.G.node[n]['recover_day'] = 14
-				self.G.node[n]['repno'] = 0
+				self.G.nodes[n]['status'] = 'infected'
+				self.G.nodes[n]['day'] = 0
+				self.G.nodes[n]['future'] = 'immunity'
+				self.G.nodes[n]['symptoms'] = False
+				self.G.nodes[n]['recover_day'] = 14
+				self.G.nodes[n]['repno'] = 0
 			else:
-				self.G.node[n]['status'] = 'healthy'
-				self.G.node[n]['repno'] = -1
+				self.G.nodes[n]['status'] = 'healthy'
+				self.G.nodes[n]['repno'] = -1
 		self.cases_count = infected_init
 		#self.inf_count, self.health_count, self.immune_count, self.dead_count = 0, 0, 0, 0
 		self.cases_data = [infected_init] 
 		self.inf_data, self.health_data, self.dead_data, self.immune_data = [], [], [], []
 		if setval:
 			self.set_parameters()
-		#print 'Spread initialized. Run daily spread functions to continue the spread'
+		#print('Spread initialized. Run daily spread functions to continue the spread')
 
 	def many_dayrun(self, num_days, lockstart=None, lockend=None, postlock=False, complete_norm=None, curve=False, img_file='temp.png', datafile='temp.json'):
 		self.complete_norm = complete_norm
@@ -39,12 +39,12 @@ class Spread_Net():
 		#self.set_parameters()
 		for i in range(num_days):
 			#if i%10==0:
-			#	print 'Running simulation for day', i+1
+			#	print('Running simulation for day', i+1)
 			if i+1>=lockstart and i+1<=lockend:
 				self.dayrun(is_lockdown=True, is_postlock=False, daynum=i+1)
 			elif postlock and i+1>lockend:
 				if i+1<=complete_norm:
-					#print 'Will run dayrun with postlock'
+					#print('Will run dayrun with postlock')
 					self.dayrun(is_lockdown=False, is_postlock=True, daynum=i+1)
 				else:
 					self.dayrun(is_lockdown=False, is_postlock=False, daynum=i+1)
@@ -78,7 +78,7 @@ class Spread_Net():
 		ax.plot(x, datadict['immune'], 'b', linewidth=0.5)
 		ax.plot(x, datadict['dead'], 'k', linewidth=0.5)
 		ax.plot(x, datadict['total'], 'y', linewidth=0.5)
-		#print 'checking before plotting', N
+		#print('checking before plotting', N)
 		if lockstart:
 			ax.plot([lockstart]*3, [0, N/2, N], color='0.5')
 		if lockend:
@@ -87,7 +87,7 @@ class Spread_Net():
 			ax.plot([complete_norm]*3, [0, N/2, N], color='pink')
 		if confidence:
 			if not stdevdict:
-				print 'stdevdict not specified. Skipping drawing intervals'
+				print('stdevdict not specified. Skipping drawing intervals')
 			else:
 				ax.fill_between(x, [b-a for a,b in zip(stdevdict['healthy'], datadict['healthy'])], [b+a for a,b in zip(stdevdict['healthy'], datadict['healthy'])], color='g', alpha=0.1)
 				ax.fill_between(x, [b-a for a,b in zip(stdevdict['infected'], datadict['infected'])], [b+a for a,b in zip(stdevdict['infected'], datadict['infected'])], color='r', alpha=0.1)
@@ -121,7 +121,7 @@ class Spread_Net():
 			if set(this)=={0,self.infected_init}:
 				no_spread.add(k)
 
-		print len(list(no_spread)), 'of the', num_sims, 'simulations did not show any spread'
+		print(len(list(no_spread)), 'of the', num_sims, 'simulations did not show any spread')
 
 		newdata = {key:[] for key in datadict.keys()}
 
@@ -139,30 +139,30 @@ class Spread_Net():
 		self.immune_susceptible()
 		self.inf_count, self.health_count, self.immune_count, self.dead_count = 0, 0, 0, 0
 		for n in self.G.nodes():
-			if self.G.node[n]['status']=='infected':
+			if self.G.nodes[n]['status']=='infected':
 				self.inf_count+=1
-				self.G.node[n]['day']+=1
-			elif self.G.node[n]['status']=='healthy':
+				self.G.nodes[n]['day']+=1
+			elif self.G.nodes[n]['status']=='healthy':
 				self.health_count+=1
-			elif self.G.node[n]['status']=='dead':
+			elif self.G.nodes[n]['status']=='dead':
 				self.dead_count+=1
-			elif self.G.node[n]['status']=='immune':
+			elif self.G.nodes[n]['status']=='immune':
 				self.immune_count+=1
 			else:
-				print 'node', n, 'has unidentifiable status'
+				print('node', n, 'has unidentifiable status')
 		self.spread_infection(is_lockdown=is_lockdown, is_postlock=is_postlock, daynum=daynum)
 
 	def kill(self):
 		#kills people by a probability distribution of their sick time
 		dead = []
 		for n in self.G.nodes():
-			if self.G.node[n]['status']=='infected':
-				if self.G.node[n]['future']=='death':
-					if self.G.node[n]['day']==self.G.node[n]['death_day']:
+			if self.G.nodes[n]['status']=='infected':
+				if self.G.nodes[n]['future']=='death':
+					if self.G.nodes[n]['day']==self.G.nodes[n]['death_day']:
 						dead.append(n)
 		#a person dies as per probability calculated from their day of sickness
 		for n in dead:
-			self.G.node[n]['status'] = 'dead'
+			self.G.nodes[n]['status'] = 'dead'
 		#returns the number of people killed
 		return len(dead)
 
@@ -170,18 +170,18 @@ class Spread_Net():
 		#scans all nodes that do not have future as dead and probabilistically decides by the day if they recover today
 		to_update = []
 		for n in self.G.nodes():
-			if self.G.node[n]['status']=='infected':
-				if self.G.node[n]['future']!='death':
-					if self.G.node[n]['day']==self.G.node[n]['recover_day']:
+			if self.G.nodes[n]['status']=='infected':
+				if self.G.nodes[n]['future']!='death':
+					if self.G.nodes[n]['day']==self.G.nodes[n]['recover_day']:
 						to_update.append(n)
 
 		for n in to_update:
-			if self.G.node[n]['future']=='immunity':
-				self.G.node[n]['status'] = 'immune'
-			elif self.G.node[n]['future']=='health':
-				self.G.node[n]['status'] = 'healthy'
+			if self.G.nodes[n]['future']=='immunity':
+				self.G.nodes[n]['status'] = 'immune'
+			elif self.G.nodes[n]['future']=='health':
+				self.G.nodes[n]['status'] = 'healthy'
 			else:
-				print 'Unexpected future/status on node', n, self.G.node[n]
+				print('Unexpected future/status on node', n, self.G.nodes[n])
 		
 
 	def recover_func(self, x):
@@ -190,13 +190,13 @@ class Spread_Net():
 	def spread_infection(self, is_lockdown=False, is_postlock=False, daynum=None):
 		to_infect = []
 		for n in self.G.nodes():
-			if self.G.node[n]['status']=='infected':
-				if self.G.node[n]['symptoms']:
+			if self.G.nodes[n]['status']=='infected':
+				if self.G.nodes[n]['symptoms']:
 					tval = self.trans_symp
 				elif is_postlock:
 					factor = float(self.complete_norm-daynum)/(self.complete_norm - self.lockend)
 					tval = self.trans_asymp - factor*(self.trans_asymp-self.trans_post)
-					#print 'In postlock, daynum is', daynum, 'tval is', tval
+					#print('In postlock, daynum is', daynum, 'tval is', tval)
 				else:
 					tval = self.trans_asymp
 				neighbors = list(self.G.neighbors(n))
@@ -212,7 +212,7 @@ class Spread_Net():
 				essential_vulnerable = []
 				non_ess_vul = []
 				for vulnode in vulnerable:
-					if self.G.node[vulnode]['essential']:
+					if self.G.nodes[vulnode]['essential']:
 						essential_vulnerable.append(vulnode)
 					else:
 						non_ess_vul.append(vulnode)
@@ -223,8 +223,8 @@ class Spread_Net():
 					ess_factor = (self.trans_symp*k - self.trans_asymp*kprime)/(k - kprime)
 				if ess_factor<0:
 					ess_factor = 0
-				#print 'ess_factor is', ess_factor
-				#print 'k is', k, 'kprime is', kprime
+				#print('ess_factor is', ess_factor)
+				#print('k is', k, 'kprime is', kprime)
 				if essential_vulnerable:
 					affected_ess = random.sample(essential_vulnerable, int(round(self.trans_symp*len(essential_vulnerable))))
 				else:
@@ -233,27 +233,27 @@ class Spread_Net():
 					affected_noness = random.sample(non_ess_vul, int(round(ess_factor*len(non_ess_vul))))
 				else:
 					affected_noness = []
-				if self.G.node[n]['symptoms']:
+				if self.G.nodes[n]['symptoms']:
 					affected_neighbors = affected_noness+affected_ess
 				else:
 					affected_neighbors = random.sample(vulnerable, int(round(tval*len(vulnerable))))
-				#print 'Will infect', len(affected_neighbors), 'would have infected', int(round(tval*len(vulnerable)))
+				#print('Will infect', len(affected_neighbors), 'would have infected', int(round(tval*len(vulnerable))))
 				#affected_neighbors = random.sample(vulnerable, int(round(tval*len(vulnerable))))
 				#see how many of affected neighbors are susceptible. Those add to the reproduction number of this node
 				repnum = 0
 				for aff in affected_neighbors:
-					if self.G.node[aff]['status']=='healthy':
+					if self.G.nodes[aff]['status']=='healthy':
 						repnum+=1
-				self.G.node[n]['repno']+=repnum
+				self.G.nodes[n]['repno']+=repnum
 				to_infect.extend(affected_neighbors)
 		infected_today = []
 		for n in to_infect:
-			if self.G.node[n]['status']=='healthy':
-				self.G.node[n]['status'] = 'infected'
-				self.G.node[n]['day'] = 0
-				self.G.node[n]['repno'] = 0
+			if self.G.nodes[n]['status']=='healthy':
+				self.G.nodes[n]['status'] = 'infected'
+				self.G.nodes[n]['day'] = 0
+				self.G.nodes[n]['repno'] = 0
 				infected_today.append(n)
-		#print infected_today, 'people were newly infected today'
+		#print(infected_today, 'people were newly infected today')
 		self.infect_dict[daynum] = infected_today
 		self.cases_count+=len(infected_today)
 		asymp = random.sample(infected_today, int(round(self.asymp_ratio*len(infected_today))))
@@ -262,14 +262,14 @@ class Spread_Net():
 		symp_set = set(symp)
 		for n in infected_today:
 			if n in symp_set:
-				self.G.node[n]['symptoms'] = True
+				self.G.nodes[n]['symptoms'] = True
 			else:
-				self.G.node[n]['symptoms'] = False
+				self.G.nodes[n]['symptoms'] = False
 		f = self.death_rate/(1-self.asymp_ratio)
 		to_die = random.sample(symp, int(round(f*len(symp))))
 		for n in to_die:
-			self.G.node[n]['future'] = 'death'
-			self.G.node[n]['death_day'] = np.random.choice(np.arange(5,25), p = self.death_list)
+			self.G.nodes[n]['future'] = 'death'
+			self.G.nodes[n]['death_day'] = np.random.choice(np.arange(5,25), p = self.death_list)
 		rest = list(set(infected_today) - set(to_die))
 		#immune and make the rest of rest susceptible
 		fi = self.immune_rate/(1-self.death_rate)
@@ -277,10 +277,10 @@ class Spread_Net():
 		immset = set(to_imm)
 		for n in rest:
 			if n in immset:
-				self.G.node[n]['future'] = 'immunity'
+				self.G.nodes[n]['future'] = 'immunity'
 			else:
-				self.G.node[n]['future'] = 'health'
-			self.G.node[n]['recover_day'] = np.random.choice(np.arange(1,36), p = self.recover_list)
+				self.G.nodes[n]['future'] = 'health'
+			self.G.nodes[n]['recover_day'] = np.random.choice(np.arange(1,36), p = self.recover_list)
 
 
 	def reproduction_number(self, givedata = True, nodelevel = False, draw = False, img_file = 'temp_reprno.png', datafile = 'temp_reprs.json'):
@@ -291,12 +291,12 @@ class Spread_Net():
 		std = []
 		rep_by_day = {}
 		list_of_days = sorted(self.infect_dict.keys())
-		#print 'the dict is', self.infect_dict
+		#print('the dict is', self.infect_dict)
 		for this_day in list_of_days:
 			day_nodes = self.infect_dict[this_day]
-			repr_list = [float(self.G.node[n]['repno']) for n in day_nodes]
+			repr_list = [float(self.G.nodes[n]['repno']) for n in day_nodes]
 			repdict[this_day] = repr_list
-			#print 'repr_list is', repr_list
+			#print('repr_list is', repr_list)
 			if not repr_list:
 				avg_rep = 0
 				std_rep = 0
